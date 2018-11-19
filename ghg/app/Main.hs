@@ -13,4 +13,4 @@ main = do
   play (InWindow "Fun" (1000,1000) (100,100)) white 60 (Menu (M 1) (randomVals gen)) game2Pic eventHandler worldStepper
 
 randomVals :: StdGen -> [Float]
-randomVals seed = randomRs (-100,100) seed
+randomVals seed = randomRs (1.0e-323,0.9999999999999999) seed

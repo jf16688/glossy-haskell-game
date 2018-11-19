@@ -10,6 +10,7 @@ module Lib
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import System.Random
+import Codeword
 
 worldHeight :: Int
 worldHeight = 18
@@ -33,16 +34,19 @@ data Game = Play {for   :: Fg,
           deriving Show
 
 initial_game :: [Float] -> Game
-initial_game (r:rands) = Play{..}
+initial_game (r:t:x:rands) = Play{..}
   where
     for     = Fg []--Foreground ((map . map) (const Nothing) [[1..width] | _ <- [1..height]])
-    back    = Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]])
-    wtf     = Word2Find "hello"
+    back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
+    wtf     = Word2Find (dictionary !! (floor ((length dictionary) * t))
     -- fall    = FallingBlock S (0, fromIntegral $ width `div` 2) North
     fall      = newFallingBlock r
     word      = ""
     accTime = 0
     acceleration = 1
+
+addInChar :: [String] -> Float -> Background -> Background
+addInChar = undefined
 
 -- TODO: ADD TO THIS
 newFallingBlock :: Float -> FallingBlock
