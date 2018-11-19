@@ -4,6 +4,7 @@ import Lib
 import UserInput (eventHandler)
 import WorldStepper (worldStepper)
 import Renderer (game2Pic)
+import Codeword
 
 main :: IO ()
 main = do
