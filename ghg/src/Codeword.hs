@@ -3,4 +3,4 @@ import System.IO.Unsafe
 
 
 dictionary :: [String]
-dictionary = unsafePerformIO $ lines <$> readFile "dictionary.txt"
+dictionary = unsafePerformIO $ lines <$> readFile "src/dictionary.txt"
