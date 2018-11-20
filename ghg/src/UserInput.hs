@@ -17,6 +17,7 @@ data Move = Rotate Direction
           | WordInput Char
           | GuessWord
           | Start
+          | BackSpace
           deriving Show
 
 eventHandler :: Event -> Game -> Game
@@ -28,6 +29,7 @@ getMove (EventKey (SpecialKey key) Down _ _) =
     KeyUp    -> Just (Rotate Right)
     -- KeyDown  -> Just (Rotate Left)
     KeySpace -> Just Start
+    KeyBackspace -> Just BackSpace
     KeyRight -> Just (Move Right)
     KeyLeft  -> Just (Move Left)
     KeyDown -> Just (FastDrop True)
@@ -58,8 +60,17 @@ update (Just x) g@Play{fall = FallingBlock t c r, acceleration, wtf = Word2Find 
     Move d -> changeIfNoCollision (FallingBlock t (movePoint d c) r) g
     FastDrop True -> g { acceleration = acceleration * 10 } -- Bump the tick rate by some scaler
     FastDrop False -> g { acceleration = acceleration / 10 }
+    WordInput '\b' -> g { word = "" }
+    BackSpace -> g { word = "" }
     WordInput c -> g { word = word ++ [c] }
     GuessWord -> if wtf == word then Menu (M 3) rands else g {word = ""}
+    _ -> g
+update (Just x) g@Menu{menu = GameOver t wtf cs} =
+  case x of
+    GuessWord -> if wtf == cs then g { menu = M 3 } else g { menu = Lose wtf }
+    WordInput '\b' -> g { menu = GameOver t wtf "" }
+    BackSpace -> traceShowId $ g { menu = GameOver t wtf "" }
+    WordInput c -> g {menu = GameOver t wtf (cs ++ [c])}
     _ -> g
 update _ g = g
 

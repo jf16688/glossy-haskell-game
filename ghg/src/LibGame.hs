@@ -22,15 +22,15 @@ worldWidth = 10
 data Fg = Fg { unFg :: [((Int, Int), Tetramino)] } deriving Show
 
 data Game = Play {for   :: Fg,
-                  opacity :: Opacity,
-                  mines :: Mines,
-                  wtf   :: Word2Find,
-                  fall  :: FallingBlock,
-                  word  :: String,
+                  opacity :: !Opacity,
+                  mines :: !Mines,
+                  wtf   :: !Word2Find,
+                  fall  :: !FallingBlock,
+                  word  :: !String,
                   rands :: [Float],
-                  accTime :: Float,
-                  acceleration :: Float,
-                  foundChars :: [Char]}
+                  accTime :: !Float,
+                  acceleration :: !Float,
+                  foundChars :: ![Char]}
           | Menu {menu :: Menu,
                   rands :: [Float]
                   }
@@ -158,7 +158,7 @@ wallCollision = (any f) . blockPoints where
   f :: (Int,Int) -> Bool
   f (y,x) = (x < 0) || (x >= worldWidth)
 
-data Menu = M Int deriving Show
+data Menu = M Int | GameOver String String String | Lose String deriving Show
 {-
 data FallingBlock = FallingBlock { tetra :: Tetramino
                                  , rotation :: Int

@@ -28,9 +28,9 @@ fallBlock (FallingBlock tet (y, x) rot) = FallingBlock tet (y+1, x) rot
 
 worldStepper :: Float -> Game -> Game
 worldStepper dt (Menu menu rs) = Menu menu rs
-worldStepper dt game
+worldStepper dt game@Play{..}
   | accTime + dt < (interval / acceleration) = game { accTime = accTime + dt }
-  | any (\((y,_), _) -> y == 0) (unFg for) = Menu (M 2) rands
+  | any (\((y,_), _) -> y == 0) (unFg for) = Menu (GameOver foundChars (unWord2Find wtf) "") rands 
   | otherwise = encircled (game { for = for''
                                 , fall = chosenBlock
                                 , opacity = opacity'
@@ -39,7 +39,6 @@ worldStepper dt game
   where
     -- (Play for' opacity' mines' wtf' fall' _ (r:rands') accTime' _) = game
     -- Pattern matches on everything
-    Play{..} = game
     (r:rands') = rands
 
     fall' = fallBlock fall
@@ -125,9 +124,9 @@ encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCur
   remdups :: [((Int, Int),Maybe Rotation)] -> [((Int, Int),Maybe Rotation)]
   remdups = (fmap head) . (groupBy g) . (sortBy f)
   f :: ((Int, Int),Maybe Rotation) -> ((Int, Int),Maybe Rotation) -> Ordering
-  f ((a,_),_) ((b,_),_) = compare a b
+  f (a,_) (b,_) = compare a b
   g :: ((Int, Int),Maybe Rotation) -> ((Int, Int),Maybe Rotation) -> Bool
-  g ((y1,x1),_) ((y2,x2),_) = (y2 == y1) && (x2 == x1)
+  g (a,_) (b,_) = a == b
 
   -- False if edge has been hit
   hasTermed :: [((Int, Int),Maybe Rotation)] -> Bool
