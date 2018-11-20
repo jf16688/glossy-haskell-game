@@ -73,7 +73,49 @@ index xss = zipWith f [0..] (map (zip [0..]) xss)
 touchingMine :: Mines -> FallingBlock -> Bool
 touchingMine (Mines ms) fb = any ((flip elem) (map fst ms)) (blockPoints fb)
 
-
+encircled :: Game -> Game
+encircled (Play {mines = m, for = f})@g = g {mines = vM,foundChars = vC} where
+  (vM,vC) = adjustBasedOnBool v1 (unMines m)
+  adjustBasedOnBool :: [Bool] -> [((Int,Int),Char)] -> ([((Int,Int),Char)],[Char])
+  adjustBasedOnBool [] xs = (xs,[])
+  adjustBasedOnBool xs [] = ([],[])
+  adjustBasedOnBool (True:bs)  (((y,x),c):xs) = threaderMine ((y,x),c) (adjustBasedOnBool bs xs)
+  adjustBasedOnBool (False:bs) (((y,x),c):xs) = threaderChar (c) (adjustBasedOnBool bs xs)
+  threaderChar :: Char -> ([((Int,Int),Char)],[Char]) -> ([((Int,Int),Char)],[Char])
+  threaderChar ks (bs,cs) = (bs,ks:cs)
+  threaderMine :: ((Int,Int),Char) -> ([((Int,Int),Char)],[Char]) -> ([((Int,Int),Char)],[Char])
+  threaderMine a (as,bs) = (a:as,bs)
+  v1 = fmap ((testWith (((fmap fst) . unFg) f)) . fst) (fmap ((\(x,_) -> ([(x,Nothing)])) . fst) (unMines m))
+  testWith :: [(Int,Int)] -> ([((Int, Int),Maybe Rotation)]) -> Bool
+  testWith [] gs = False
+  testWith fs [] = False
+  testWith fs gs = hastermed v2 || testWith fs v2
+  v2 = (remove fs ((remdups . expand) gs))
+  hastermed :: [((Int, Int),Maybe Rotation)] -> Bool
+  hastermed = any testEdge
+  testEdge :: ((Int,Int),Maybe Rotation) -> Bool
+  testEdge ((y,x),_) = y < 0 || x < 0 || y >= worldHeight || x >= worldWidth
+  expand :: [((Int, Int),Maybe Rotation)] -> [((Int, Int),Maybe Rotation)]
+  expand [] = []
+  expand (((y,x),Nothing):xs) = [((y-1,x),Just North),((y,x-1),Just East),((y+1,x),Just South),((y,x+1),Just West)] ++ (expand xs)
+  expand (((y,x),(Just North)):xs) = [((y-1,x),Just North),((y,x-1),Just East),((y,x+1),Just West)] ++ (expand xs)
+  expand (((y,x),(Just South)):xs) = [((y,x-1),Just East),((y+1,x),Just South),((y,x+1),Just West)] ++ (expand xs)
+  expand (((y,x),(Just East)):xs) = [((y-1,x),Just North),((y,x-1),Just East),((y+1,x),Just South)] ++ (expand xs)
+  expand (((y,x),(Just West)):xs) = [((y-1,x),Just North),((y+1,x),Just South),((y,x+1),Just West)] ++ (expand xs)
+  remdups :: [((Int, Int),Maybe Rotation)] -> [((Int, Int),Maybe Rotation)]
+  remdups = (fmap head) . (groupBy g) . (sortBy f)
+  f :: ((Int, Int),Maybe Rotation) -> ((Int, Int),Maybe Rotation) -> Ordering
+  f ((a,_),_) ((b,_),_) = compare a b
+  g :: ((Int, Int),Maybe Rotation) -> ((Int, Int),Maybe Rotation) -> Bool
+  g ((y1,x1),_) ((y2,x2),_) = (y2 == y1) && (x2 == x1)
+  remove :: [(Int,Int)] -> ([((Int, Int),Maybe Rotation)]) -> ([((Int, Int),Maybe Rotation)])
+  remove [] xs = xs
+  remove (y:ys) xs = remove ys (removeValue y xs)
+  removeValue :: (Int,Int) -> ([((Int, Int),Maybe Rotation)]) -> ([((Int, Int),Maybe Rotation)])
+  removeValue _ [] = []
+  removeValue (y1,x1) (((y2,x2),dir):xs) | y1 == x1 && y2 == x2 = removeValue (y1,x1) xs
+                                         | otherwise            = ((y2,x2),dir) : (removeValue (y1,x1) xs)
+encircled (Menu a b) = Menu a b
 
 removeFullRows :: Fg -> Fg
 removeFullRows (Fg xs) = Fg (fst . foldr f' ([],0) $ ys)  where
