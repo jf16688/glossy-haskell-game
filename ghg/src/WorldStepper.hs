@@ -122,11 +122,12 @@ encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCur
     v2 = (remove fs ((remdups . expand) gs))
 
   remdups :: [((Int, Int),Maybe Rotation)] -> [((Int, Int),Maybe Rotation)]
-  remdups = (fmap head) . (groupBy g) . (sortBy f)
-  f :: ((Int, Int),Maybe Rotation) -> ((Int, Int),Maybe Rotation) -> Ordering
-  f (a,_) (b,_) = compare a b
-  g :: ((Int, Int),Maybe Rotation) -> ((Int, Int),Maybe Rotation) -> Bool
-  g (a,_) (b,_) = a == b
+  -- remdups = (fmap head) . (groupBy g) . (sortBy f)
+  remdups = nubBy (\(a, _) (b, _) -> a == b) 
+  -- f :: ((Int, Int),Maybe Rotation) -> ((Int, Int),Maybe Rotation) -> Ordering
+  -- f (a,_) (b,_) = compare a b
+  -- g :: ((Int, Int),Maybe Rotation) -> ((Int, Int),Maybe Rotation) -> Bool
+  -- g (a,_) (b,_) = a == b
 
   -- False if edge has been hit
   hasTermed :: [((Int, Int),Maybe Rotation)] -> Bool

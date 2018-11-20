@@ -26,7 +26,7 @@ rendMenu i = Pictures [Color (red) (Polygon [(-220,-50),(220,-50),(220,50),(-220
   where
     s = case i of
       M 1 -> "Press Space to Play Game"
-      GameOver s wtf g -> "Final Guess: " ++ wtf -- ++ "\n" ++ g
+      GameOver s wtf g -> "Final Guess: " ++ s -- ++ "\n" ++ g
       Lose s -> "You Lose, word was: " ++ s
       M 3 -> "YOU WIN!!!!"
       _ -> "Something went wrong"
