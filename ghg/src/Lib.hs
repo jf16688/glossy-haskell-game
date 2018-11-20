@@ -29,7 +29,8 @@ data Game = Play {for   :: Fg,
                   word  :: String,
                   rands :: [Float],
                   accTime :: Float,
-                  acceleration :: Float}
+                  acceleration :: Float,
+                  foundChars :: [Char]}
           | Menu {menu :: Menu,
                   rands :: [Float]
                   }
@@ -50,6 +51,7 @@ initial_game (r:t:x:floats) = Play{..}
     word      = ""
     accTime = 0
     acceleration = 1
+    foundChars = []
 
 addInChar :: Word2Find -> [Float] -> Mines
 addInChar (Word2Find wtf) floats = traceShowId $ Mines $ zip (uniqueCoords floats) wtf
