@@ -107,7 +107,7 @@ encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCur
   adjustBasedOnBool (False:bs) (((y,x),c):xs) = threaderChar (c) ((y,x),I) (adjustBasedOnBool bs xs)
 
   threaderChar :: Char -> ((Int,Int),Tetramino) -> ([((Int,Int),Char)],[Char],Fg) -> ([((Int,Int),Char)],[Char],Fg)
-  threaderChar ks xs (bs,cs,(Fg fg)) = (bs,ks:cs,(Fg (xs:((explode 20 [fst xs] fg [])))))
+  threaderChar ks xs (bs,cs,(Fg fg)) = (bs,ks:cs,(Fg (xs:fg)))
 
   explode :: Int -> [(Int, Int)] -> [((Int,Int),Tetramino)] -> [(Int,Int)] -> ([((Int,Int),Tetramino)])
   explode 0 fs gs exs = (remove exs gs)
