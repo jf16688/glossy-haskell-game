@@ -30,7 +30,7 @@ worldStepper :: Float -> Game -> Game
 worldStepper dt (Menu menu rs) = Menu menu rs
 worldStepper dt game@Play{..}
   | accTime + dt < (interval / acceleration) = game { accTime = accTime + dt }
-  | any (\((y,_), _) -> y == 0) (unFg for) = Menu (GameOver foundChars (unWord2Find wtf) "") rands 
+  | any (\((y,_), _) -> y == 0) (unFg for) = Menu (GameOver foundChars (unWord2Find wtf) "") rands
   | otherwise = encircled (game { for = for''
                                 , fall = chosenBlock
                                 , opacity = opacity'
@@ -107,12 +107,18 @@ encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCur
   adjustBasedOnBool (False:bs) (((y,x),c):xs) = threaderChar (c) ((y,x),I) (adjustBasedOnBool bs xs)
 
   threaderChar :: Char -> ((Int,Int),Tetramino) -> ([((Int,Int),Char)],[Char],Fg) -> ([((Int,Int),Char)],[Char],Fg)
-  threaderChar ks xs (bs,cs,(Fg fg)) = (bs,ks:cs,(Fg (xs:fg)))
+  threaderChar ks xs (bs,cs,(Fg fg)) = (bs,ks:cs,(Fg (xs:((explode 20 [fst xs] fg [])))))
+
+  explode :: Int -> [(Int, Int)] -> [((Int,Int),Tetramino)] -> [(Int,Int)] -> ([((Int,Int),Tetramino)])
+  explode 0 fs gs exs = (remove exs gs)
+  explode _ [] gs exs = (remove exs gs)
+  explode n fs gs exs = explode (n - 1) (fmap fst fs') gs (exs ++ exs') where
+    (fs',exs') = (remove' fs) . (\(a) -> (a,[]) ) . remdups . expand $ (fmap ((\(a,b) -> ((a,b),Nothing)) . fst) gs)
 
   threaderMine :: ((Int,Int),Char) -> ([((Int,Int),Char)],[Char],Fg) -> ([((Int,Int),Char)],[Char],Fg)
   threaderMine a (as,bs,fg) = (a:as,bs,fg)
 
-  v1 = fmap (testWith 20 (((fmap fst) (unFg forValue)))) (fmap ((\x -> ([(x,Nothing)])) . fst) (unMines m))
+  v1 = fmap (testWith 30 (((fmap fst) (unFg forValue)))) (fmap ((\x -> ([(x,Nothing)])) . fst) (unMines m))
 
   testWith :: Int -> [(Int,Int)] -> ([((Int, Int),Maybe Rotation)]) -> Bool
   --testWith [] gs = False
@@ -122,7 +128,7 @@ encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCur
     v2 = remove fs . remdups . expand $ gs
 
   remdups :: [((Int, Int),Maybe Rotation)] -> [((Int, Int),Maybe Rotation)]
-  remdups = nubBy (\(a, _) (b, _) -> a == b) 
+  remdups = nubBy (\(a, _) (b, _) -> a == b)
 
   -- False if edge has been hit
   hasTermed :: [((Int, Int),Maybe Rotation)] -> Bool
@@ -142,7 +148,7 @@ encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCur
   expand' ((y,x),(Just East)) = [((y-1,x),Just North),((y,x-1),Just East),((y+1,x),Just South)]
   expand' ((y,x),(Just West)) = [((y-1,x),Just North),((y+1,x),Just South),((y,x+1),Just West)]
 
-  -- remove == 
+  -- remove ==
 encircled (Menu a b) = Menu a b
 
 
@@ -164,3 +170,14 @@ removeValue :: Eq a => a -> ([(a,b)]) -> ([(a,b)])
 removeValue _ [] = []
 removeValue a ((b,dir):xs) | a == b = removeValue a xs
                                         | otherwise = (b,dir) :(removeValue a xs)
+
+remove' :: Eq a => [a] -> ([(a,b)],[a]) -> ([(a,b)],[a])
+remove' [] xs = xs
+remove' (y:ys) xs = remove' ys (removeValue' y xs)
+
+removeValue' :: Eq a => a -> ([(a,b)],[a]) -> ([(a,b)],[a])
+removeValue' _ ([],ys) = ([],ys)
+removeValue' a (((b,dir):xs),ys) | a == b    = (removeValue' a (xs,a:ys))
+                                 | otherwise = threadThrough (b,dir) (removeValue' a (xs,ys)) where
+                          threadThrough :: (a,b) -> ([(a,b)],[a]) -> ([(a,b)],[a])
+                          threadThrough (b,dir) (xs,as) = ((b,dir):xs,as)
