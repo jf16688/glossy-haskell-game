@@ -12,8 +12,6 @@ import Graphics.Gloss.Interface.Pure.Game
 import System.Random
 import Codeword
 import qualified Data.Map.Lazy as M
-import Debug.Trace
-
 
 worldHeight :: Int
 worldHeight = 18
@@ -56,7 +54,7 @@ initial_game (r:t:x:floats) = Play{..}
     foundChars = []
 
 addInChar :: Word2Find -> [Float] -> Mines
-addInChar (Word2Find wtf) floats = traceShowId $ Mines $ zip (uniqueCoords floats) wtf
+addInChar (Word2Find wtf) floats = Mines $ zip (uniqueCoords floats) wtf
 
 uniqueCoords :: [Float] -> [(Int, Int)]
 uniqueCoords fs = foldr (\f cs -> let c = coord f in if c `elem` cs then cs else c:cs) [] fs

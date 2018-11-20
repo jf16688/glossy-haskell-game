@@ -120,7 +120,7 @@ encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCur
   testWith 0 fs gs = False
   testWith _ fs [] = False
   testWith n fs gs = (hasTermed v2) || testWith (n - 1) fs v2 where
-    v2 = (remove fs ((remdups . expand) (remove fs gs)))
+    v2 = (remove fs ((remdups . expand) gs))
 
   remdups :: [((Int, Int),Maybe Rotation)] -> [((Int, Int),Maybe Rotation)]
   remdups = (fmap head) . (groupBy g) . (sortBy f)

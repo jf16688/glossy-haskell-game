@@ -19,14 +19,14 @@ game2Pic (Play {for = f, opacity = b, fall = p, word = w, foundChars = cs}) = Tr
   bg = [Color (makeColor 0.95 0.95 0.95 1) (basicBlock xLength yLength)]
 
 rendMenu :: Menu -> Picture
-rendMenu (M i) = Pictures [Color (red) (Polygon [(-170,-50),(170,-50),(170,50),(-170,50)]),
-                              Translate (-140) (-25) (Scale 0.4 0.4  (Text s)),
-                              Color (blue) (Line [(-170,-50),(170,-50),(170,50),(-170,50),(-170,-50)])
+rendMenu (M i) = Pictures [Color (red) (Polygon [(-220,-50),(220,-50),(220,50),(-220,50)]),
+                              Translate (-205) (-25) (Scale 0.2 0.2  (Text s)),
+                              Color (blue) (Line [(-220,-50),(220,-50),(220,50),(-220,50),(-220,-50)])
                              ]
   where
     s = case i of
       1 -> "Press Space to Play Game"
-      2 -> "Game Over: Try Again? (Press space noob)"
+      2 -> "Game Over: Space to try again"
       3 -> "YOU WIN!!!!"
       _ -> "Something went wrong"
 
