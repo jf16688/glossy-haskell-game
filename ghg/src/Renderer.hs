@@ -1,6 +1,6 @@
 module Renderer (game2Pic) where
 
-import Lib
+import LibGame
 import qualified Data.Map.Lazy as M
 
 blockSize :: Float

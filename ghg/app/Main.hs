@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import LibGame
 import UserInput (eventHandler)
 import WorldStepper (worldStepper)
 import Renderer (game2Pic)

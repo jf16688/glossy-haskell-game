@@ -5,7 +5,7 @@ module UserInput (eventHandler) where
 
 import Prelude hiding (Right, Left)
 import qualified Prelude as P
-import Lib hiding (Rotate)
+import LibGame hiding (Rotate)
 import Debug.Trace
 -- import System.Random
 

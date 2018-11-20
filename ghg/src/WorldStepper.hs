@@ -2,7 +2,7 @@
 
 module WorldStepper (worldStepper) where
 
-import Lib
+import LibGame
 import Data.Maybe
 import Data.List
 import Debug.Trace
