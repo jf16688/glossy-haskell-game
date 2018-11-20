@@ -15,3 +15,13 @@ abacus
 backpack
 dictionary
 password
+bumblebee
+omega
+pineapple
+lambda
+lynx
+parsley
+coriander
+oregano
+basil
+GADTs

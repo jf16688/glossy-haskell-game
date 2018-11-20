@@ -37,20 +37,21 @@ initial_game :: [Float] -> Game
 initial_game (r:t:x:rands) = Play{..}
   where
     for     = Fg []--Foreground ((map . map) (const Nothing) [[1..width] | _ <- [1..height]])
+    -- back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
     back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
-    wtf     = Word2Find (dictionary !! (floor ((length dictionary) * t))
+    wtf     = Word2Find (dictionary !! (floor ((fromIntegral (length dictionary)) * t)))
     -- fall    = FallingBlock S (0, fromIntegral $ width `div` 2) North
     fall      = newFallingBlock r
     word      = ""
     accTime = 0
     acceleration = 1
 
-addInChar :: [String] -> Float -> Background -> Background
-addInChar = undefined
+addInChar :: Word2Find -> Float -> Background -> Background
+addInChar _ _ = id
 
 -- TODO: ADD TO THIS
 newFallingBlock :: Float -> FallingBlock
-newFallingBlock r = FallingBlock ([minBound..maxBound] !! ((floor r) `mod` 7))
+newFallingBlock r = FallingBlock ([minBound..maxBound] !! (floor $ 7 * r))
                                  (0, 5)
                                  North
 

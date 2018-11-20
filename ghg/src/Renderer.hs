@@ -28,6 +28,7 @@ rendMenu (M i) = Pictures [Color (red) (Polygon [(-170,-50),(170,-50),(170,50),(
     s = case i of
       1 -> "Press Space to Play Game"
       2 -> "Game Over: Try Again? (Press space noob)"
+      3 -> "YOU WIN!!!!"
       _ -> "Something went wrong"
 
 rendBack :: Background -> [Picture]
