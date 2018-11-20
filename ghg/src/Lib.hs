@@ -21,7 +21,8 @@ worldWidth = 10
 data Fg = Fg { unFg :: [((Int, Int), Tetramino)] } deriving Show
 
 data Game = Play {for   :: Fg,
-                  back  :: Background,
+                  opacity :: Opacity,
+                  mines :: Mines,
                   wtf   :: Word2Find,
                   fall  :: FallingBlock,
                   word  :: String,
@@ -38,7 +39,8 @@ initial_game (r:t:x:rands) = Play{..}
   where
     for     = Fg []--Foreground ((map . map) (const Nothing) [[1..width] | _ <- [1..height]])
     -- back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
-    back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
+    mines = Mines []
+    opacity    = Opacity ((map . map) (const 0) [[1..worldWidth] | _ <- [1..worldHeight]])--addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
     wtf     = Word2Find (dictionary !! (floor ((fromIntegral (length dictionary)) * t)))
     -- fall    = FallingBlock S (0, fromIntegral $ width `div` 2) North
     fall      = newFallingBlock r
@@ -46,8 +48,8 @@ initial_game (r:t:x:rands) = Play{..}
     accTime = 0
     acceleration = 1
 
-addInChar :: Word2Find -> Float -> Background -> Background
-addInChar _ _ = id
+addInChar :: Word2Find -> Float -> Mines
+addInChar wtf float = Mines []
 
 -- TODO: ADD TO THIS
 newFallingBlock :: Float -> FallingBlock
@@ -56,9 +58,11 @@ newFallingBlock r = FallingBlock ([minBound..maxBound] !! (floor $ 7 * r))
                                  North
 
 
-data Background = Background [[(Maybe Char, Int)]] deriving Show
+-- data Background = Background ([[Int]], [((Int, Int), Maybe Char)]) deriving Show
+newtype Opacity = Opacity { unOpacity :: [[Int]] } deriving Show
+newtype Mines = Mines { unMines :: [((Int, Int), Char)] } deriving Show
 
-data Foreground = Foreground [[Maybe Tetramino]] deriving Show
+newtype Foreground = Foreground [[Maybe Tetramino]] deriving Show
 
 -- initData :: Game
 -- --initData = Menu {menu = (M 0)}
@@ -72,7 +76,7 @@ data Foreground = Foreground [[Maybe Tetramino]] deriving Show
 -- initArrBack = Background ([b,b,b,b,b,b,b,b]) where
 --   b = [(Nothing,0),(Nothing,0),(Nothing,0),(Nothing,0)]
 
-data Word2Find = Word2Find String deriving Show
+newtype Word2Find = Word2Find String deriving Show
 
 data FallingBlock = FallingBlock Tetramino (Float, Float) Rotation deriving Show
 

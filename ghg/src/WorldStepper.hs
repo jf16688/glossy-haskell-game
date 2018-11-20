@@ -34,7 +34,7 @@ worldStepper dt game
                      , accTime = 0
                      , rands   = rands' }
   where
-    (Play for' back' wtf' fall' _ (r:rands') accTime' _) = game
+    (Play for' opacity' mines' wtf' fall' _ (r:rands') accTime' _) = game
 
     fall'' = fallBlock fall'
     collided = hasCollided for' (fall'')
@@ -64,14 +64,15 @@ index xss = zipWith f [0..] (map (zip [0..]) xss)
     f :: Int -> [(Int, (a, b))] -> [((Int, Int), a, b)]
     f y xts = map (\(x, (a, b)) -> ((y, x), a, b)) xts
 
-getMines :: Background -> [(Int, Int)]
-getMines (Background bss) = map fst3 (concat (map (filter isMine) (index bss)))
-  where
-    isMine :: ((Int, Int), Maybe Char, Int) -> Bool
-    isMine t = isJust (snd3 t)
 
-touchingMine :: Background -> FallingBlock -> Bool
-touchingMine bg fb = any ((flip elem) (getMines bg)) (blockPoints fb)
+-- getMines :: Background -> [(Int, Int)]
+-- getMines (Background bss) = map fst3 (concat (map (filter isMine) (index bss)))
+--   where
+--     isMine :: ((Int, Int), Maybe Char, Int) -> Bool
+--     isMine t = isJust (snd3 t)
+
+touchingMine :: Mines -> FallingBlock -> Bool
+touchingMine (Mines ms) fb = any ((flip elem) (map fst ms)) (blockPoints fb)
 
 
 
