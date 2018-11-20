@@ -4,17 +4,21 @@ module Lib
   ( module Lib
   , module Graphics.Gloss
   , module Graphics.Gloss.Interface.Pure.Game
+  , module System.Random
   ) where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import System.Random
+import Codeword
 
 worldHeight :: Int
 worldHeight = 18
 
 worldWidth :: Int
 worldWidth = 10
+
+data Fg = Fg { unFg :: [((Int, Int), Tetramino)] } deriving Show
 
 data Game = Play {for   :: Fg,
                   back  :: Background,
@@ -24,29 +28,37 @@ data Game = Play {for   :: Fg,
                   rands :: [Float],
                   accTime :: Float,
                   acceleration :: Float}
-          | Menu {menu :: Menu}
+          | Menu {menu :: Menu,
+                  rands :: [Float]
+                  }
           deriving Show
 
-initial_game :: Int -> Int -> Game
-initial_game width height = Play{..}
+initial_game :: [Float] -> Game
+initial_game (r:t:x:rands) = Play{..}
   where
     for     = Fg []--Foreground ((map . map) (const Nothing) [[1..width] | _ <- [1..height]])
-    back    = Background ((map . map) (const (Nothing,0)) [[1..width] | _ <- [1..height]])
-    wtf     = Word2Find "hello"
-    fall    = FallingBlock S (0, fromIntegral $ width `div` 2) North
-    word    = ""
-    rands   = randomVals 1
+    -- back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
+    back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
+    wtf     = Word2Find (dictionary !! (floor ((fromIntegral (length dictionary)) * t)))
+    -- fall    = FallingBlock S (0, fromIntegral $ width `div` 2) North
+    fall      = newFallingBlock r
+    word      = ""
     accTime = 0
     acceleration = 1
+
+addInChar :: Word2Find -> Float -> Background -> Background
+addInChar _ _ = id
+
+-- TODO: ADD TO THIS
+newFallingBlock :: Float -> FallingBlock
+newFallingBlock r = FallingBlock ([minBound..maxBound] !! (floor $ 7 * r))
+                                 (0, 5)
+                                 North
+
 
 data Background = Background [[(Maybe Char, Int)]] deriving Show
 
 data Foreground = Foreground [[Maybe Tetramino]] deriving Show
-
-data Fg = Fg [((Int, Int), Tetramino)] deriving Show
-
-randomVals :: Float -> [Float]
-randomVals seed = randomRs (-100,100) (mkStdGen ((fromInteger . toInteger . floor) seed))
 
 -- initData :: Game
 -- --initData = Menu {menu = (M 0)}

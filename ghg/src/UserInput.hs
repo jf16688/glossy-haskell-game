@@ -4,8 +4,10 @@
 module UserInput (eventHandler) where
 
 import Prelude hiding (Right, Left)
+import qualified Prelude as P
 import Lib hiding (Rotate)
 import Debug.Trace
+-- import System.Random
 
 data Direction = Left | Right deriving Show
 
@@ -13,6 +15,7 @@ data Move = Rotate Direction
           | Move Direction
           | FastDrop Bool
           | WordInput Char
+          | GuessWord
           | Start
           deriving Show
 
@@ -23,13 +26,15 @@ getMove :: Event -> Maybe Move
 getMove (EventKey (SpecialKey key) Down _ _) =
   case key of
     KeyUp    -> Just (Rotate Right)
-    KeyDown  -> Just (Rotate Left)
+    -- KeyDown  -> Just (Rotate Left)
+    KeySpace -> Just Start
     KeyRight -> Just (Move Right)
     KeyLeft  -> Just (Move Left)
-    KeySpace -> Just (FastDrop True)
+    KeyDown -> Just (FastDrop True)
+    KeyEnter -> Just GuessWord
     _        -> Nothing
 -- getMove (EventKey (Char '(' Down _ _) = Just Start
-getMove (EventKey (SpecialKey KeySpace) Up _ _) = Just $ FastDrop False
+getMove (EventKey (SpecialKey KeyDown) Up _ _) = Just $ FastDrop False
 
 getMove (EventKey (Char c) Down _ _) = Just (WordInput c)
 getMove _ = Nothing
@@ -46,14 +51,15 @@ movePoint Left c = addPointPoint c (0, -1)
 
 update :: Maybe Move -> Game -> Game
 -- update x y = traceShow (x, y) y
-update (Just (FastDrop _)) g@Menu{} = traceShow "Hey we're doing a thing now." $ initial_game 10 10
-update (Just x) g@Play{fall = FallingBlock t c r, acceleration} =
+update (Just Start) g@Menu{rands} = initial_game rands
+update (Just x) g@Play{fall = FallingBlock t c r, acceleration, wtf = Word2Find wtf, word, rands} =
   case traceShowId x of
     Rotate d -> changeIfNoCollision (FallingBlock t c (rotateCompass d r)) g
     Move d -> changeIfNoCollision (FallingBlock t (movePoint d c) r) g
     FastDrop True -> g { acceleration = acceleration * 10 } -- Bump the tick rate by some scaler
     FastDrop False -> g { acceleration = acceleration / 10 }
-    WordInput c -> g { word = (word g) ++ [c] }
+    WordInput c -> g { word = word ++ [c] }
+    GuessWord -> if wtf == word then Menu (M 3) rands else g {word = ""}
     _ -> g
 update _ g = g
 

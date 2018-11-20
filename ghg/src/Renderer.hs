@@ -9,28 +9,34 @@ basicBlock :: Float -> Float -> Picture
 basicBlock x y = (Polygon [(0,0),(0,y),(x,y),(x,0)])
 
 game2Pic :: Game -> Picture
-game2Pic (Menu x) = rendMenu x
+game2Pic (Menu x _) = rendMenu x
 game2Pic (Play {for = f, back = b, fall = p, word = w}) = Translate (-xLength/2) (-yLength/2) (Pictures (bg ++ rendBack b ++ rendFor f yLength ++ rendFall p yLength ++ (fmap (Translate (xLength) (0)) (rendWord w)))) where
   bArr    = g b
   yLength = (fromIntegral (length bArr)) * blockSize
   xLength = (fromIntegral (length (head bArr))) * blockSize
   bg :: [Picture]
-  bg      = [Color (makeColor 0.5 0.5 0.5 1) (basicBlock xLength yLength)]
+  bg      = [Color (makeColor 0.95 0.95 0.95 1) (basicBlock xLength yLength)]
   g :: Background -> [[(Maybe Char, Int)]]
   g (Background bs) = bs
 
 rendMenu :: Menu -> Picture
 rendMenu (M i) = Pictures [Color (red) (Polygon [(-170,-50),(170,-50),(170,50),(-170,50)]),
-                              Translate (-140) (-25) (Scale 0.4 0.4  (Text "Play Game")),
+                              Translate (-140) (-25) (Scale 0.4 0.4  (Text s)),
                               Color (blue) (Line [(-170,-50),(170,-50),(170,50),(-170,50),(-170,-50)])
                              ]
+  where
+    s = case i of
+      1 -> "Press Space to Play Game"
+      2 -> "Game Over: Try Again? (Press space noob)"
+      3 -> "YOU WIN!!!!"
+      _ -> "Something went wrong"
 
 rendBack :: Background -> [Picture]
 rendBack (Background ps) = arrayBasic (fmap (fmap f) ps) where
   f :: (Maybe Char, Int) -> Picture
   f (_, x) = Color (makeColor 0 0 0 (1 - g x)) (basicBlock blockSize blockSize)
   g :: Int -> Float
-  g x = exp (-(((fromIntegral x) + 1)/ 3))
+  g x = exp (-(((fromIntegral x))/ 3))
 
 rendFor :: Fg -> Float -> [Picture]
 rendFor (Fg ps) s = (fmap (f s)) ps where
@@ -48,13 +54,13 @@ rendWord s = [Text s]
 --makeColor red green blue alpha
 
 rendTetramino :: Tetramino -> Picture -> Picture
-rendTetramino I p = Color (makeColor 0 0.9 0.9 1) p
-rendTetramino O p = Color (makeColor 0.9 0.9 0 1) p
-rendTetramino T p = Color (makeColor 0.9 0 0.9 1) p
-rendTetramino S p = Color (makeColor 0 0.9 0 1) p
-rendTetramino Z p = Color (makeColor 0.9 0 0 1) p
-rendTetramino J p = Color (makeColor 0 0 0.9 1) p
-rendTetramino L p = Color (makeColor 0.9 0.35 0 1) p
+rendTetramino I p = Color (makeColor 0.18 0.17 0.67 1) p
+rendTetramino O p = Color (makeColor 0.68 0.17 0.67 1) p
+rendTetramino T p = Color (makeColor 0.89 0.15 0.57 1) p
+rendTetramino S p = Color (makeColor 0.97 0.08 0.40 1) p
+rendTetramino Z p = Color (makeColor 0.97 0.86 0.08 1) p
+rendTetramino J p = Color (makeColor 0    0.62 0.69 1) p
+rendTetramino L p = Color (makeColor 0.67 1    0    1) p
 
 arrayBasic :: [[Picture]] -> [Picture]
 arrayBasic = foldr f [] where

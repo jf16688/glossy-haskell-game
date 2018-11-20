@@ -21,22 +21,16 @@ moveToForeground fb@(FallingBlock tetra _ _) (Fg ts) =
   Fg $ merge (zip (blockPoints fb) (repeat tetra)) ts
 
 
--- TODO: CHANGE THE USE OF THE RANDOM VAL
-newFallingBlock :: Float -> FallingBlock
-newFallingBlock r = FallingBlock ([minBound..maxBound] !! ((floor r) `mod` 7))
-                                 (0, 5)
-                                 North
-
 fallBlock :: FallingBlock -> FallingBlock
 fallBlock (FallingBlock tet (y, x) rot) = FallingBlock tet (y+1, x) rot
 
 worldStepper :: Float -> Game -> Game
-worldStepper dt (Menu menu) = Menu menu
+worldStepper dt (Menu menu rs) = Menu menu rs
 worldStepper dt game
   | (accTime game) + dt < (interval / (acceleration game)) = game { accTime = (accTime game) + dt }
-  | otherwise = game { for     = for'''
-                     , back    = back'
-                     , fall    = chosenBlock
+  | any (\((y,_), _) -> y == 0) (unFg . for $ game)= Menu (M 2) (rands game)
+  | otherwise = game { for = for'''
+                     , fall = chosenBlock
                      , accTime = 0
                      , rands   = rands' }
   where
