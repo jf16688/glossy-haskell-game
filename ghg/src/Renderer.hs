@@ -16,7 +16,7 @@ game2Pic (Play {for = f, opacity = b, fall = p, word = w}) = Translate (-xLength
   yLength = (fromIntegral worldHeight) * blockSize
   xLength = (fromIntegral worldWidth) * blockSize
   bg :: [Picture]
-  bg      = [Color (makeColor 0.95 0.95 0.95 1) (basicBlock xLength yLength)]
+  bg = [Color (makeColor 0.95 0.95 0.95 1) (basicBlock xLength yLength)]
 
 rendMenu :: Menu -> Picture
 rendMenu (M i) = Pictures [Color (red) (Polygon [(-170,-50),(170,-50),(170,50),(-170,50)]),
@@ -35,7 +35,7 @@ rendBack (Opacity ps) s = (fmap (f s) (M.toList ps)) where
   f :: Float -> ((Int,Int),Int) -> Picture
   f s ((y,x),o) = Color (makeColor 0 0 0 (1 - g o)) (Translate ((fromIntegral x) * blockSize) (s - (fromIntegral y) * blockSize) (basicBlock blockSize blockSize))
   g :: Int -> Float
-  g x = exp (-(((fromIntegral x))/ 3))
+  g x = exp (-(((fromIntegral x))/ 120))
 
 rendFor :: Fg -> Float -> [Picture]
 rendFor (Fg ps) s = (fmap (f s)) ps where

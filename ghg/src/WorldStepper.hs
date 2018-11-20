@@ -23,7 +23,6 @@ moveToForeground :: FallingBlock -> Fg -> Fg
 moveToForeground fb@(FallingBlock tetra _ _) (Fg ts) =
   Fg $ merge (zip (blockPoints fb) (repeat tetra)) ts
 
-
 fallBlock :: FallingBlock -> FallingBlock
 fallBlock (FallingBlock tet (y, x) rot) = FallingBlock tet (y+1, x) rot
 
@@ -34,6 +33,7 @@ worldStepper dt game
   | any (\((y,_), _) -> y == 0) (unFg for) = Menu (M 2) rands
   | otherwise = game { for = for''
                      , fall = chosenBlock
+                     , opacity = opacity'
                      , accTime = 0
                      , rands   = rands' }
   where
@@ -59,17 +59,22 @@ worldStepper dt game
     opacity' :: Opacity
     opacity' = if touchingMine mines chosenBlock
                   then incOpacity opacity chosenBlock
-                  else opacity
+                  else decOpacity opacity
 
+touchingMine :: Mines -> FallingBlock -> Bool
+touchingMine (Mines ms) fb = any ((flip elem) (map fst ms)) (blockPoints fb)
 
 incOpacity :: Opacity -> FallingBlock -> Opacity
 incOpacity op fb = foldr f op (blockPoints fb)
   where
     f :: (Int, Int) -> Opacity -> Opacity
     f pos (Opacity m)
-      | M.member pos m = Opacity (M.adjust (+1) pos m)
-      | otherwise      = Opacity (M.insert pos 1 m)
+      | M.member pos m = Opacity (M.adjust (+30) pos m)
+      | otherwise      = Opacity (M.insert pos 30 m)
 
+decOpacity :: Opacity -> Opacity
+decOpacity (Opacity m) = Opacity (M.fromList (filter ((0 <) . snd) (M.toList (fmap (\x -> x - 1) m))))
+-- decOpacity (Opacity m) = Opacity (M.fromList (filter ((0 <) . snd) (M.toList (fmap ((-)1) m))))
 
 fst3 :: (a, b, c) -> a
 fst3 (x, _, _) = x
@@ -90,8 +95,7 @@ index xss = zipWith f [0..] (map (zip [0..]) xss)
 --     isMine :: ((Int, Int), Maybe Char, Int) -> Bool
 --     isMine t = isJust (snd3 t)
 
-touchingMine :: Mines -> FallingBlock -> Bool
-touchingMine (Mines ms) fb = any ((flip elem) (map fst ms)) (blockPoints fb)
+
 
 
 

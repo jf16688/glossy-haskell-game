@@ -12,6 +12,8 @@ import Graphics.Gloss.Interface.Pure.Game
 import System.Random
 import Codeword
 import qualified Data.Map.Lazy as M
+import Debug.Trace
+
 
 worldHeight :: Int
 worldHeight = 18
@@ -29,28 +31,40 @@ data Game = Play {for   :: Fg,
                   word  :: String,
                   rands :: [Float],
                   accTime :: Float,
-                  acceleration :: Float}
+                  acceleration :: Float,
+                  foundChars :: [Char]}
           | Menu {menu :: Menu,
                   rands :: [Float]
                   }
           deriving Show
 
 initial_game :: [Float] -> Game
-initial_game (r:t:x:rands) = Play{..}
+initial_game (r:t:x:floats) = Play{..}
   where
     for     = Fg []--Foreground ((map . map) (const Nothing) [[1..width] | _ <- [1..height]])
     -- back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
-    mines = Mines []
-    opacity    = Opacity M.empty--Opacity ((map . map) (const 0) [[1..worldWidth] | _ <- [1..worldHeight]])--addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
+
+    (floats', rands) = splitAt (length $ unWord2Find wtf) floats
+    mines = addInChar wtf floats'
+    opacity = Opacity M.empty
     wtf     = Word2Find (dictionary !! (floor ((fromIntegral (length dictionary)) * t)))
     -- fall    = FallingBlock S (0, fromIntegral $ width `div` 2) North
     fall      = newFallingBlock r
     word      = ""
     accTime = 0
     acceleration = 1
+    foundChars = []
 
-addInChar :: Word2Find -> Float -> Mines
-addInChar wtf float = Mines []
+addInChar :: Word2Find -> [Float] -> Mines
+addInChar (Word2Find wtf) floats = traceShowId $ Mines $ zip (uniqueCoords floats) wtf
+
+uniqueCoords :: [Float] -> [(Int, Int)]
+uniqueCoords fs = foldr (\f cs -> let c = coord f in if c `elem` cs then cs else c:cs) [] fs
+  where
+    h = worldHeight - 4
+    coord :: Float -> (Int, Int)
+    coord f = let x = floor $ (fromIntegral $ h * worldWidth) * f in ((x `mod` h) + 2, x `div` h)
+
 
 -- TODO: ADD TO THIS
 newFallingBlock :: Float -> FallingBlock
@@ -78,7 +92,7 @@ newtype Foreground = Foreground [[Maybe Tetramino]] deriving Show
 -- initArrBack = Background ([b,b,b,b,b,b,b,b]) where
 --   b = [(Nothing,0),(Nothing,0),(Nothing,0),(Nothing,0)]
 
-newtype Word2Find = Word2Find String deriving Show
+newtype Word2Find = Word2Find { unWord2Find :: String } deriving Show
 
 data FallingBlock = FallingBlock Tetramino (Float, Float) Rotation deriving Show
 
