@@ -16,8 +16,6 @@ worldHeight = 18
 worldWidth :: Int
 worldWidth = 10
 
-data Fg = Fg [((Int, Int), Tetramino)] deriving Show
-
 data Game = Play {for   :: Fg,
                   back  :: Background,
                   wtf   :: Word2Find,
@@ -44,6 +42,8 @@ initial_game width height = Play{..}
 data Background = Background [[(Maybe Char, Int)]] deriving Show
 
 data Foreground = Foreground [[Maybe Tetramino]] deriving Show
+
+data Fg = Fg [((Int, Int), Tetramino)] deriving Show
 
 randomVals :: Float -> [Float]
 randomVals seed = randomRs (-100,100) (mkStdGen ((fromInteger . toInteger . floor) seed))

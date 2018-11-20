@@ -21,7 +21,7 @@ moveToForeground fb@(FallingBlock tetra _ _) (Fg ts) =
   Fg $ merge (zip (blockPoints fb) (repeat tetra)) ts
 
 
--- TODO: ADD TO THIS
+-- TODO: CHANGE THE USE OF THE RANDOM VAL
 newFallingBlock :: Float -> FallingBlock
 newFallingBlock r = FallingBlock ([minBound..maxBound] !! ((floor r) `mod` 7))
                                  (0, 5)
@@ -34,10 +34,11 @@ worldStepper :: Float -> Game -> Game
 worldStepper dt (Menu menu) = Menu menu
 worldStepper dt game
   | (accTime game) + dt < (interval / (acceleration game)) = game { accTime = (accTime game) + dt }
-  | otherwise = game { for = for'''
-                     , fall = chosenBlock
+  | otherwise = game { for     = for'''
+                     , back    = back'
+                     , fall    = chosenBlock
                      , accTime = 0
-                     , rands = rands' }
+                     , rands   = rands' }
   where
     (Play for' back' wtf' fall' _ (r:rands') accTime' _) = game
 
@@ -53,6 +54,32 @@ worldStepper dt game
                then moveToForeground fall' for'
                else for'
     for''' = removeFullRows for''
+
+    -- Minesweeper stuff
+
+fst3 :: (a, b, c) -> a
+fst3 (x, _, _) = x
+
+snd3 :: (a, b, c) -> b
+snd3 (_, y, _) = y
+
+-- This sucks, I'm so sorry
+index :: [[(a, b)]] -> [[((Int, Int), a, b)]]
+index xss = zipWith f [0..] (map (zip [0..]) xss)
+  where
+    f :: Int -> [(Int, (a, b))] -> [((Int, Int), a, b)]
+    f y xts = map (\(x, (a, b)) -> ((y, x), a, b)) xts
+
+getMines :: Background -> [(Int, Int)]
+getMines (Background bss) = map fst3 (concat (map (filter isMine) (index bss)))
+  where
+    isMine :: ((Int, Int), Maybe Char, Int) -> Bool
+    isMine t = isJust (snd3 t)
+
+touchingMine :: Background -> FallingBlock -> Bool
+touchingMine bg fb = any ((flip elem) (getMines bg)) (blockPoints fb)
+
+
 
 removeFullRows :: Fg -> Fg
 removeFullRows (Fg xs) = Fg (fst . foldr f' ([],0) $ ys)  where
