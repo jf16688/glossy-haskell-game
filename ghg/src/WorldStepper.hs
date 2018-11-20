@@ -20,7 +20,6 @@ moveToForeground :: FallingBlock -> Fg -> Fg
 moveToForeground fb@(FallingBlock tetra _ _) (Fg ts) =
   Fg $ merge (zip (blockPoints fb) (repeat tetra)) ts
 
-
 fallBlock :: FallingBlock -> FallingBlock
 fallBlock (FallingBlock tet (y, x) rot) = FallingBlock tet (y+1, x) rot
 
@@ -34,7 +33,7 @@ worldStepper dt game
                      , accTime = 0
                      , rands   = rands' }
   where
-    (Play for' opacity' mines' wtf' fall' _ (r:rands') accTime' _) = game
+    (Play for' opacity' mines' wtf' fall' _ (r:rands') accTime' _ _) = game
 
     fall'' = fallBlock fall'
     collided = hasCollided for' (fall'')
