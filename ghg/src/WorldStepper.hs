@@ -1,9 +1,12 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module WorldStepper (worldStepper) where
 
 import Lib
 import Data.Maybe
 import Data.List
 import Debug.Trace
+import qualified Data.Map.Lazy as M
 
 interval :: Float
 interval = 0.5
@@ -27,29 +30,46 @@ fallBlock (FallingBlock tet (y, x) rot) = FallingBlock tet (y+1, x) rot
 worldStepper :: Float -> Game -> Game
 worldStepper dt (Menu menu rs) = Menu menu rs
 worldStepper dt game
-  | (accTime game) + dt < (interval / (acceleration game)) = game { accTime = (accTime game) + dt }
-  | any (\((y,_), _) -> y == 0) (unFg . for $ game)= Menu (M 2) (rands game)
-  | otherwise = game { for = for'''
+  | accTime + dt < (interval / acceleration) = game { accTime = accTime + dt }
+  | any (\((y,_), _) -> y == 0) (unFg for) = Menu (M 2) rands
+  | otherwise = game { for = for''
                      , fall = chosenBlock
                      , accTime = 0
                      , rands   = rands' }
   where
-    (Play for' opacity' mines' wtf' fall' _ (r:rands') accTime' _) = game
+    -- (Play for' opacity' mines' wtf' fall' _ (r:rands') accTime' _) = game
+    -- Pattern matches on everything
+    Play{..} = game
+    (r:rands') = rands
 
-    fall'' = fallBlock fall'
-    collided = hasCollided for' (fall'')
+    fall' = fallBlock fall
+    collided = hasCollided for (fall')
 
     chosenBlock :: FallingBlock
     chosenBlock = if collided
                     then newFallingBlock r -- Make new falling block
-                    else fall''
+                    else fall'
 
-    for'' = if collided
-               then moveToForeground fall' for'
-               else for'
-    for''' = removeFullRows for''
+    for' = if collided
+               then moveToForeground fall for
+               else for
+    for'' = removeFullRows for'
 
     -- Minesweeper stuff
+    opacity' :: Opacity
+    opacity' = if touchingMine mines chosenBlock
+                  then incOpacity opacity chosenBlock
+                  else opacity
+
+
+incOpacity :: Opacity -> FallingBlock -> Opacity
+incOpacity op fb = foldr f op (blockPoints fb)
+  where
+    f :: (Int, Int) -> Opacity -> Opacity
+    f pos (Opacity m)
+      | M.member pos m = Opacity (M.adjust (+1) pos m)
+      | otherwise      = Opacity (M.insert pos 1 m)
+
 
 fst3 :: (a, b, c) -> a
 fst3 (x, _, _) = x
@@ -57,13 +77,12 @@ fst3 (x, _, _) = x
 snd3 :: (a, b, c) -> b
 snd3 (_, y, _) = y
 
--- This sucks, I'm so sorry
-index :: [[(a, b)]] -> [[((Int, Int), a, b)]]
+
+index :: [[a]] -> [[((Int, Int), a)]]
 index xss = zipWith f [0..] (map (zip [0..]) xss)
   where
-    f :: Int -> [(Int, (a, b))] -> [((Int, Int), a, b)]
-    f y xts = map (\(x, (a, b)) -> ((y, x), a, b)) xts
-
+    f :: Int -> [(Int, a)] -> [((Int, Int), a)]
+    f y xts = map (\(x, t) -> ((y, x), t)) xts
 
 -- getMines :: Background -> [(Int, Int)]
 -- getMines (Background bss) = map fst3 (concat (map (filter isMine) (index bss)))

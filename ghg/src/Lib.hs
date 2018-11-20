@@ -11,6 +11,7 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import System.Random
 import Codeword
+import qualified Data.Map.Lazy as M
 
 worldHeight :: Int
 worldHeight = 18
@@ -40,7 +41,7 @@ initial_game (r:t:x:rands) = Play{..}
     for     = Fg []--Foreground ((map . map) (const Nothing) [[1..width] | _ <- [1..height]])
     -- back    = addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
     mines = Mines []
-    opacity    = Opacity ((map . map) (const 0) [[1..worldWidth] | _ <- [1..worldHeight]])--addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
+    opacity    = Opacity M.empty--Opacity ((map . map) (const 0) [[1..worldWidth] | _ <- [1..worldHeight]])--addInChar wtf x (Background ((map . map) (const (Nothing,0)) [[1..worldWidth] | _ <- [1..worldHeight]]))
     wtf     = Word2Find (dictionary !! (floor ((fromIntegral (length dictionary)) * t)))
     -- fall    = FallingBlock S (0, fromIntegral $ width `div` 2) North
     fall      = newFallingBlock r
@@ -59,7 +60,8 @@ newFallingBlock r = FallingBlock ([minBound..maxBound] !! (floor $ 7 * r))
 
 
 -- data Background = Background ([[Int]], [((Int, Int), Maybe Char)]) deriving Show
-newtype Opacity = Opacity { unOpacity :: [[Int]] } deriving Show
+-- newtype Opacity = Opacity { unOpacity :: [[Int]] } deriving Show
+newtype Opacity = Opacity { unOpacity :: M.Map (Int, Int) Int } deriving Show
 newtype Mines = Mines { unMines :: [((Int, Int), Char)] } deriving Show
 
 newtype Foreground = Foreground [[Maybe Tetramino]] deriving Show
