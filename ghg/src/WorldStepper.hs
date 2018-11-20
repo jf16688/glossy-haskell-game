@@ -98,20 +98,20 @@ index xss = zipWith f [0..] (map (zip [0..]) xss)
 
 encircled :: Game -> Game
 -- encircled x = x
-encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCurr {mines = (Mines vM),foundChars = cC ++ vC} where
-  (vM,vC) = adjustBasedOnBool v1 (unMines m)
+encircled gameCurr@(Play {mines = m, for = forValue, foundChars = cC}) = gameCurr {mines = (Mines vM),foundChars = cC ++ vC, for = vF} where
+  (vM,vC,vF) = adjustBasedOnBool v1 (unMines m)
 
-  adjustBasedOnBool :: [Bool] -> [((Int,Int),Char)] -> ([((Int,Int),Char)],[Char])
-  adjustBasedOnBool [] xs = (xs,[])
-  adjustBasedOnBool xs [] = ([],[])
+  adjustBasedOnBool :: [Bool] -> [((Int,Int),Char)] -> ([((Int,Int),Char)],[Char],Fg)
+  adjustBasedOnBool [] xs = (xs,[],forValue)
+  adjustBasedOnBool xs [] = ([],[],forValue)
   adjustBasedOnBool (True:bs)  (((y,x),c):xs) = threaderMine ((y,x),c) (adjustBasedOnBool bs xs)
-  adjustBasedOnBool (False:bs) (((y,x),c):xs) = threaderChar (c) (adjustBasedOnBool bs xs)
+  adjustBasedOnBool (False:bs) (((y,x),c):xs) = threaderChar (c) ((y,x),I) (adjustBasedOnBool bs xs)
 
-  threaderChar :: Char -> ([((Int,Int),Char)],[Char]) -> ([((Int,Int),Char)],[Char])
-  threaderChar ks (bs,cs) = (bs,ks:cs)
+  threaderChar :: Char -> ((Int,Int),Tetramino) -> ([((Int,Int),Char)],[Char],Fg) -> ([((Int,Int),Char)],[Char],Fg)
+  threaderChar ks xs (bs,cs,(Fg fg)) = (bs,ks:cs,(Fg (xs:fg)))
 
-  threaderMine :: ((Int,Int),Char) -> ([((Int,Int),Char)],[Char]) -> ([((Int,Int),Char)],[Char])
-  threaderMine a (as,bs) = (a:as,bs)
+  threaderMine :: ((Int,Int),Char) -> ([((Int,Int),Char)],[Char],Fg) -> ([((Int,Int),Char)],[Char],Fg)
+  threaderMine a (as,bs,fg) = (a:as,bs,fg)
 
   v1 = fmap (testWith 20 (((fmap fst) (unFg forValue)))) (fmap ((\x -> ([(x,Nothing)])) . fst) (unMines m))
 
