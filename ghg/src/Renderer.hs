@@ -11,7 +11,7 @@ basicBlock x y = (Polygon [(0,0),(0,y),(x,y),(x,0)])
 
 game2Pic :: Game -> Picture
 game2Pic (Menu x _) = rendMenu x
-game2Pic (Play {for = f, opacity = b, fall = p, word = w}) = Translate (-xLength/2) (-yLength/2) (Pictures (bg ++ rendBack b yLength ++ rendFor f yLength ++ rendFall p yLength ++ (fmap (Translate (xLength) (0)) (rendWord w)))) where
+game2Pic (Play {for = f, opacity = b, fall = p, word = w, foundChars = cs}) = Translate (-xLength/2) (-yLength/2) (Pictures (bg ++ rendBack b yLength ++ rendFor f yLength ++ rendFall p yLength ++ (fmap (Translate (xLength) (10)) (rendWord w)) ++ (fmap (Translate (xLength) (yLength/2)) (rendWord cs)))) where
   --bArr    = unOpacity b
   yLength = (fromIntegral worldHeight) * blockSize
   xLength = (fromIntegral worldWidth) * blockSize
@@ -48,7 +48,7 @@ rendFall b@(FallingBlock tet _ _) t = ((fmap ((rendTetramino tet) . (f t))) . bl
   f top (y,x) = Translate ((fromIntegral x) * blockSize) (top - ((fromIntegral y) * blockSize)) (basicBlock blockSize blockSize)
 
 rendWord :: String -> [Picture]
-rendWord s = [Text s]
+rendWord s = [Scale 0.4 0.4 (Text s)]
 
 --makeColor red green blue alpha
 

@@ -61,9 +61,10 @@ addInChar (Word2Find wtf) floats = traceShowId $ Mines $ zip (uniqueCoords float
 uniqueCoords :: [Float] -> [(Int, Int)]
 uniqueCoords fs = foldr (\f cs -> let c = coord f in if c `elem` cs then cs else c:cs) [] fs
   where
-    h = worldHeight - 4
+    h = worldHeight - 7
+    w = worldWidth - 2
     coord :: Float -> (Int, Int)
-    coord f = let x = floor $ (fromIntegral $ h * worldWidth) * f in ((x `mod` h) + 2, x `div` h)
+    coord f = let x = floor $ (fromIntegral $ h * w) * f in ((x `mod` h) + 5, (x `div` h) + 1)
 
 
 -- TODO: ADD TO THIS
